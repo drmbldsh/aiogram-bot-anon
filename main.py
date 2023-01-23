@@ -1,5 +1,5 @@
 import os
-#import keep_alive
+
 
 TOKEN = os.environ['drmbl_token']
 chat_id = os.environ['test_chat_id']

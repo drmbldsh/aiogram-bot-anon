@@ -7,10 +7,11 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.handler import CancelHandler
 import asyncio
-from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ParseMode, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from typing import List, Union
 import requests
+from aiogram.utils.markdown import text, bold, italic, code, pre
 
 
 bot = Bot(token=TOKEN)
@@ -34,7 +35,7 @@ menu_kb.add(button_menu)
 @dp.callback_query_handler(text=['send_dudes', 'personal_profile', 'story'])
 async def random_value(call: types.CallbackQuery):
     if call.data == 'send_dudes':
-        await call.message.answer(text='Пожалуйста, отправьте вашу фотографию/фотографии одним сообщением.')
+        await call.message.answer(text='Пожалуйста, отправьте вашу фотографию/фотографии одним сообщением.', reply_markup = menu_kb)
     with open('send_dudes.txt', 'r', encoding = 'utf-8') as msg_txt:
       if call.data == 'personal_profile':
           await call.message.answer(
@@ -55,10 +56,13 @@ async def send_welcome(message: types.Message):
 @dp.message_handler()
 async def echo(message: types.Message):
     await message.answer('Ваша история скоро будет опубликована', reply_markup =  menu_kb)
-    messag = message.text.replace("#", "%23")
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={messag}"
-    print(requests.get(url).json())
+    m = message.text
+    ent = message.entities
+    #url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={messag}"
+    #print(requests.get(url).json())
     print(message.text)
+    await bot.send_message(chat_id=chat_id, text=m, entities=ent)
+  
 
 
 class AlbumMiddleware(BaseMiddleware):
@@ -113,7 +117,7 @@ async def handle_albums(message: types.Message, album: List[types.Message]):
 @dp.message_handler(content_types=["photo"])
 async def get_photo(message):
     file_id = message.photo[-1].file_id
-    await bot.send_photo(chat_id, file_id, caption = message.caption)
+    await bot.send_photo(chat_id, file_id, caption = message.caption, caption_entities=message.caption_entities)
     await message.answer('Ваша фотография скоро будет опубликована!')
 
 

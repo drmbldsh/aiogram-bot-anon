@@ -39,7 +39,7 @@ async def random_value(call: types.CallbackQuery):
     with open('send_dudes.txt', 'r', encoding = 'utf-8') as msg_txt:
       if call.data == 'personal_profile':
           await call.message.answer(
-              text= msg_txt.read())
+              text= msg_txt.read(), reply_markup=menu_kb)
     if call.data == 'story':
         await call.message.answer(text='Пожалуйста, напишите вашу историю в одном сообщении.\n\nЕсли желаете ДОБАВИТЬ ФОТОГРАФИЮ к вашему рассказу:\n- Либо прикрепите вашу историю к фото\n- Либо, если не хватает знаков, чтобы прикрепить текст к фото, то отправьте их несколькими сообщениями, НО ОТМЕТЬТЕ вашу историю и фотографию.Например, поставьте одинаковый смайл (🌚,👾,💋,🔥 и т.д) перед историей и такой же прикрепите к вашей фотографии.', reply_markup = menu_kb)
     await call.answer()
@@ -96,7 +96,7 @@ class AlbumMiddleware(BaseMiddleware):
 async def handle_albums(message: types.Message, album: List[types.Message]):
     media_group = types.MediaGroup()
     txt = message.caption
-    for obj in album:
+    for i, obj in enumerate(album):
         if obj.photo:
             file_id = obj.photo[-1].file_id
         else:
@@ -104,7 +104,7 @@ async def handle_albums(message: types.Message, album: List[types.Message]):
 
         try:
           
-            media_group.attach({"media": file_id, "type": obj.content_type, "caption" : txt })
+            media_group.attach({"media": file_id, "type": obj.content_type, "caption" : txt if i == 0 else '', "caption_entities" : message.caption_entities })
         except ValueError:
             return await message.answer('Можно отправлять только фото')
 
